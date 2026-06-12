@@ -282,7 +282,7 @@ without requiring the user to repeat information.
 
 # Author
 
-**Aryan Soni**
+**Aryan Soni & Avaya Avijit Sahoo**
 
 B.Tech 
 
