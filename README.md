@@ -240,13 +240,13 @@ uvicorn backend.main:app --host 0.0.0.0 --port $PORT
 User:
 
 ```text
-My name is Reva.
+My name is Aryan.
 ```
 
 Stored Memory:
 
 ```text
-Name is Reva
+Name is Aryan
 ```
 
 Later:
@@ -258,7 +258,7 @@ Who am I?
 Response:
 
 ```text
-You're Reva.
+You're Aryan.
 ```
 
 without requiring the user to repeat information.
@@ -281,11 +281,11 @@ without requiring the user to repeat information.
 
 # Author
 
-**Reva Pande**
+**Aryan Soni**
 
-B.Tech CSE (AI)
+B.Tech 
 
-IGDTUW
+IIT Roorkee
 
 Built as a personal AI memory assistant exploring:
 
