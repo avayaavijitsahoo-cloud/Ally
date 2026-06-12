@@ -1093,8 +1093,22 @@ body {
           body: JSON.stringify({ message: text, model_key: currentModelKey })
         });
 
-        if (!response.ok || !response.body) {
-          throw new Error("Chat request failed");
+        if (!response.ok) {
+          let detail = "Chat request failed";
+          try {
+            const errorData = await response.json();
+            if (errorData && typeof errorData.detail === "string") {
+              detail = errorData.detail;
+            }
+          } catch {
+            const errorText = await response.text();
+            if (errorText) detail = errorText;
+          }
+          throw new Error(detail);
+        }
+
+        if (!response.body) {
+          throw new Error("Empty chat response from backend");
         }
 
         const reader = response.body.getReader();
@@ -1118,7 +1132,7 @@ body {
         }, 1600);
       } catch (err) {
         cursor.remove();
-        bubble.textContent = "Something went wrong. Is the FastAPI backend running?";
+        bubble.textContent = err instanceof Error ? err.message : "Something went wrong. Is the FastAPI backend running?";
         console.error(err);
       }
 

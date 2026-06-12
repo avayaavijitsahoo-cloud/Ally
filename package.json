@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "poetry run uvicorn backend.main:app --reload"
+    "dev": "./.venv/bin/python -m uvicorn backend.main:app --reload"
   }
 }

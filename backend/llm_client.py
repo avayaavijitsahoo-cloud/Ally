@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import os
 from collections.abc import Iterator
-from typing import Protocol
+from typing import Protocol, cast
+
+from groq.types.chat import ChatCompletionMessageParam
 
 
 class ChatClient(Protocol):
@@ -26,7 +28,7 @@ class GroqChatClient:
     def complete(self, messages: list[dict[str, str]], model: str | None = None) -> str:
         response = self.client.chat.completions.create(
             model=model or self.default_model,
-            messages=messages,
+            messages=cast(list[ChatCompletionMessageParam], messages),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.7")),
             max_tokens=int(os.getenv("LLM_MAX_TOKENS", "1200")),
         )
@@ -35,7 +37,7 @@ class GroqChatClient:
     def stream(self, messages: list[dict[str, str]], model: str | None = None) -> Iterator[str]:
         stream = self.client.chat.completions.create(
             model=model or self.default_model,
-            messages=messages,
+            messages=cast(list[ChatCompletionMessageParam], messages),
             temperature=float(os.getenv("LLM_TEMPERATURE", "0.6")),
             max_tokens=int(os.getenv("LLM_MAX_TOKENS", "900")),
             stream=True,
