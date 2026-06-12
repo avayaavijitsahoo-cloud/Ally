@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AllyAI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #fff7fb;
+      --panel: #ffffff;
+      --panel-soft: #fff0f7;
+      --ink: #1c1020;
+      --muted: #76566b;
+      --line: #f0c9dc;
+      --line-strong: #e9a9c9;
+      --pink: #d90063;
+      --pink-soft: #ffe2f0;
+      --rose: #ff6aa9;
+      --violet: #6554ff;
+      --cyan: #06b6d4;
+      --green: #168b5b;
+      --shadow: 0 18px 55px rgba(217, 0, 99, 0.13);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html,
+        body {
+          min-height: 100%;
+          overflow-x: hidden;
+          overflow-y: auto;
+      }
+
+    body {
+      color: var(--ink);
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 8% 10%, rgba(255, 167, 205, 0.42), transparent 30%),
+        radial-gradient(circle at 92% 8%, rgba(101, 84, 255, 0.14), transparent 25%),
+        linear-gradient(135deg, #fffafd 0%, #fff1f8 48%, #f8fbff 100%);
+      font-size: 14px;
+      overflow-x: hidden;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+   .app {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  min-height: 100vh;
+  width: 100%;
+}
+
+    .memory-panel {
+  border-right: 1px solid var(--line);
+  background: rgba(255, 250, 253, 0.88);
+  backdrop-filter: blur(18px);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+    .brand {
+      padding: 24px 24px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .logo-mark {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: #07040a;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 14px 30px rgba(101, 84, 255, 0.24);
+      flex: 0 0 auto;
+      overflow: hidden;
+    }
+
+    .logo-mark svg {
+      width: 45px;
+      height: 45px;
+      display: block;
+    }
+
+    @keyframes draw {
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes pulseStroke {
+      0%, 100% { stroke-width: 12; stroke-opacity: 0.82; }
+      50% { stroke-width: 14; stroke-opacity: 1; }
+    }
+
+    @keyframes floatLogo {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logo-container {
+      animation: floatLogo 6s ease-in-out infinite;
+      transform-origin: center;
+    }
+
+    .main-path {
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: draw 2.3s ease-out forwards, pulseStroke 4s ease-in-out infinite 2.3s;
+    }
+
+    .brand h1 {
+      font-size: clamp(28px, 4vw, 40px);
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 800;
+    }
+
+    .brand p {
+      color: var(--muted);
+      line-height: 1.55;
+      max-width: 290px;
+      margin-top: 7px;
+    }
+
+    .privacy-chip {
+      margin-top: 16px;
+      border: 1px solid var(--line-strong);
+      background: #fff7fb;
+      color: #8c1649;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 8px 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tabs {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 16px 16px 10px;
+    }
+
+    .tab-btn {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--muted);
+      padding: 9px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      transition: 0.2s ease;
+    }
+
+    .tab-btn:hover,
+    .tab-btn.active {
+      border-color: var(--pink);
+      background: var(--pink-soft);
+      color: var(--pink);
+    }
+
+    .sidebar-section {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px 18px;
+    }
+
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #831245;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+
+    .section-label::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+    }
+
+    .stack-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .stack-card {
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      min-height: 86px;
+      box-shadow: 0 10px 28px rgba(217, 0, 99, 0.07);
+    }
+
+    .stack-card span {
+      color: #6b2447;
+      display: block;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .stack-card strong {
+      color: var(--pink);
+      display: block;
+      font-size: clamp(18px, 5vw, 23px);
+      line-height: 1.1;
+      overflow-wrap: anywhere;
+    }
+
+    .profile-category,
+    .conversation-item,
+    .editable-fact {
+      background: rgba(255, 255, 255, 0.88);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 10px 24px rgba(217, 0, 99, 0.07);
+    }
+
+    .category-title,
+    .editor-category-title {
+      color: #86154a;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .category-facts {
+      display: grid;
+      gap: 8px;
+    }
+
+    .fact-item {
+      border-left: 3px solid var(--pink);
+      background: #fff3f9;
+      border-radius: 6px;
+      color: #301325;
+      line-height: 1.55;
+      padding: 10px 11px;
+    }
+
+    .profile-empty,
+    .import-url-hint,
+    .input-hint {
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .sidebar-footer {
+      border-top: 1px solid var(--line);
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 5px rgba(22, 139, 91, 0.13);
+    }
+
+    .status-dot.active {
+      background: var(--pink);
+      box-shadow: 0 0 0 6px rgba(217, 0, 99, 0.14);
+      animation: pulse 1.3s ease infinite;
+    }
+
+    @keyframes pulse {
+      50% { transform: scale(1.22); }
+    }
+
+   .chat-area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), rgba(255, 247, 251, 0.8)),
+    repeating-linear-gradient(90deg, rgba(217, 0, 99, 0.035) 0 1px, transparent 1px 68px);
+}
+
+    .chat-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background: rgba(255, 255, 255, 0.66);
+      backdrop-filter: blur(18px);
+    }
+
+    .chat-title {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .chat-title strong {
+      font-size: 18px;
+      line-height: 1.2;
+    }
+
+    .chat-title span,
+    .session-info {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .chat-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .model-selector select,
+    .import-url-input,
+    .add-fact-form select,
+    .add-fact-form textarea {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      border-radius: var(--radius);
+      outline: none;
+    }
+
+    .model-selector select {
+      min-width: 230px;
+      padding: 10px 12px;
+      color: #811247;
+      font-weight: 700;
+    }
+
+    .clear-btn,
+    .send-btn,
+    .new-chat-btn,
+    .import-url-btn,
+    .add-fact-btn,
+    .export-btn,
+    .import-btn,
+    .delete-fact-btn {
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-weight: 800;
+      transition: 0.2s ease;
+    }
+
+    .clear-btn,
+    .new-chat-btn,
+    .export-btn,
+    .import-btn {
+      background: #fff;
+      border-color: var(--line);
+      color: #8b164b;
+      padding: 10px 12px;
+    }
+
+    .clear-btn:hover,
+    .new-chat-btn:hover,
+    .export-btn:hover,
+    .import-btn:hover {
+      border-color: var(--pink);
+      background: var(--pink-soft);
+    }
+
+   
+    
+.messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  padding: 28px clamp(18px, 4vw, 46px);
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+  .welcome {
+      margin: auto;
+      width: min(620px, 100%);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.74);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: clamp(26px, 6vw, 48px);
+    }
+
+    .welcome-title {
+      font-size: clamp(34px, 6vw, 62px);
+      line-height: 1;
+      font-weight: 800;
+      letter-spacing: 0;
+      margin-bottom: 14px;
+    }
+
+    .welcome-title em {
+      color: var(--pink);
+      font-style: normal;
+    }
+
+    .welcome-sub {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      max-width: 470px;
+      margin: 0 auto;
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      max-width: min(780px, 92%);
+    }
+
+    .message.user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .message.assistant {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .message-role {
+      color: #8d315c;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding-inline: 4px;
+    }
+
+    .message-bubble {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 15px 17px;
+      background: rgba(255, 255, 255, 0.9);
+      line-height: 1.7;
+      overflow-wrap: anywhere;
+      box-shadow: 0 10px 30px rgba(84, 38, 63, 0.08);
+    }
+
+    .message.user .message-bubble {
+      background: linear-gradient(135deg, var(--pink), var(--rose));
+      color: #fff;
+      border-color: transparent;
+    }
+
+    .message.assistant .message-bubble p + p,
+    .message.assistant .message-bubble ul,
+    .message.assistant .message-bubble ol {
+      margin-top: 10px;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 16px;
+      background: var(--pink);
+      margin-left: 2px;
+      vertical-align: middle;
+      animation: blink 0.8s step-end infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    .input-area {
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(18px);
+      padding: 18px clamp(18px, 4vw, 46px) 22px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    #message-input {
+      flex: 1;
+      min-height: 44px;
+      max-height: 140px;
+      resize: none;
+      border: none;
+      outline: none;
+      color: var(--ink);
+      line-height: 1.6;
+      background: transparent;
+    }
+
+    #message-input::placeholder {
+      color: #9b7890;
+    }
+
+    .send-btn,
+    .import-url-btn,
+    .add-fact-btn {
+      background: linear-gradient(135deg, var(--pink), var(--rose));
+      color: #fff;
+      padding: 12px 16px;
+      box-shadow: 0 12px 24px rgba(217, 0, 99, 0.18);
+    }
+
+    .send-btn:disabled,
+    .import-url-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .conversation-item {
+      cursor: pointer;
+    }
+
+    .conversation-item:hover,
+    .conversation-item.active {
+      border-color: var(--pink);
+      background: #fff2f8;
+    }
+
+    .conversation-title {
+      font-weight: 800;
+      margin-bottom: 8px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conversation-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .conversation-delete,
+    .delete-fact-btn {
+      border: none;
+      background: #ffe5ef;
+      color: #ae174f;
+      min-width: 28px;
+      height: 28px;
+      padding: 0 8px;
+    }
+
+    .import-url-section {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.82);
+      padding: 14px;
+      margin: 14px 0;
+    }
+
+    .import-url-form {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 9px;
+    }
+
+    .import-url-input {
+      min-width: 0;
+      flex: 1;
+      padding: 10px;
+    }
+
+    .import-status {
+      font-weight: 700;
+      margin-top: 9px;
+      line-height: 1.4;
+    }
+
+    .import-status.success {
+      color: var(--green);
+    }
+
+    .import-status.error {
+      color: #bf174d;
+    }
+
+    .editor-actions,
+    .add-fact-form {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .editor-actions {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .add-fact-form select,
+    .add-fact-form textarea {
+      width: 100%;
+      padding: 11px;
+    }
+
+    .add-fact-form textarea {
+      min-height: 82px;
+      resize: vertical;
+    }
+
+    .editable-fact {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .editable-fact-content {
+      flex: 1;
+      line-height: 1.55;
+    }
+
+    .model-switch-notice {
+      align-self: center;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: #8b164b;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+
+  html,
+  body {
+    overflow-y: auto;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .memory-panel {
+    width: 100%;
+    max-height: 420px;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .chat-area {
+    width: 100%;
+    min-height: 70vh;
+  }
+
+  .chat-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .chat-actions {
+    width: 100%;
+  }
+
+  .model-selector select {
+    width: 100%;
+  }
+
+  .input-wrapper {
+    flex-direction: column;
+  }
+
+  .send-btn {
+    width: 100%;
+  }
+}
+
+    @media (max-width: 520px) {
+      .brand {
+        padding: 20px 16px 16px;
+      }
+
+      .stack-grid,
+      .tabs,
+      .editor-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .message {
+        max-width: 100%;
+      }
+    }
+    * {
+  max-width: 100%;
+}
+
+img,
+svg,
+video,
+iframe {
+  max-width: 100%;
+  height: auto;
+}
+
+textarea,
+input,
+select,
+button {
+  max-width: 100%;
+}
+
+.message-bubble {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.chat-header,
+.chat-area,
+.memory-panel {
+  min-width: 0;
+}
+body {
+  zoom: 1;
+}
+
+.app {
+  overflow: hidden;
+}
+
+.memory-panel::-webkit-scrollbar,
+.messages::-webkit-scrollbar {
+  width: 8px;
+}
+
+.memory-panel::-webkit-scrollbar-thumb,
+.messages::-webkit-scrollbar-thumb {
+  background: #d90063;
+  border-radius: 999px;
+}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="memory-panel">
+      <div class="brand">
+        <div class="brand-row">
+          <div class="logo-mark" aria-hidden="true">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="allyGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+                  <stop offset="0%" style="stop-color:#4f46e5;stop-opacity:1"></stop>
+                  <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1"></stop>
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur result="blur" stdDeviation="4"></feGaussianBlur>
+                  <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+                </filter>
+              </defs>
+              <g class="logo-container">
+                <path class="main-path" d="M60 140 C 40 140, 40 100, 60 80 L 100 40 L 140 80 C 160 100, 160 140, 140 140 C 120 140, 110 120, 100 110 C 90 120, 80 140, 60 140 Z" fill="none" filter="url(#glow)" stroke="url(#allyGradient)" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                <circle cx="100" cy="110" fill="#4f46e5" r="8">
+                  <animate attributeName="r" dur="3s" repeatCount="indefinite" values="6;10;6"></animate>
+                  <animate attributeName="opacity" dur="3s" repeatCount="indefinite" values="0.5;1;0.5"></animate>
+                </circle>
+              </g>
+            </svg>
+          </div>
+          <div>
+            <h1>AllyAI</h1>
+            <p>Your local memory vault for private, context-rich AI conversations.</p>
+          </div>
+        </div>
+        <div class="privacy-chip">Stored on device</div>
+      </div>
+
+      <nav class="tabs" aria-label="Memory sections">
+        <button class="tab-btn active" onclick="switchTab('profile')">Memory</button>
+        <button class="tab-btn" onclick="switchTab('history')">History</button>
+        <button class="tab-btn" onclick="switchTab('editor')">Edit</button>
+      </nav>
+
+      <section class="sidebar-section" id="tab-profile">
+        <div class="stack-grid" aria-label="Technology stack">
+          <div class="stack-card"><span>Backend</span><strong>FastAPI</strong></div>
+          <div class="stack-card"><span>Runtime</span><strong>Python</strong></div>
+          <div class="stack-card"><span>Database</span><strong>SQLite</strong></div>
+          <div class="stack-card"><span>Vector DB</span><strong>ChromaDB</strong></div>
+          <div class="stack-card"><span>Embeddings</span><strong>all-MiniLM-L6-v2</strong></div>
+          <div class="stack-card"><span>Used for</span><strong>Semantic Search</strong></div>
+        </div>
+        <div class="section-label">Memory Vault</div>
+        <div id="profile-content">
+          <p class="profile-empty">Your profile is empty.<br />Start chatting and AllyAI will learn as you talk.</p>
+        </div>
+      </section>
+
+      <section class="sidebar-section hidden" id="tab-history">
+        <div class="section-label">Conversations</div>
+        <div id="history-content">
+          <p class="profile-empty">No conversations yet.<br />Start chatting to build history.</p>
+        </div>
+      </section>
+
+      <section class="sidebar-section hidden" id="tab-editor">
+        <div class="section-label">Edit Profile</div>
+        <div class="editor-actions">
+          <button class="export-btn" onclick="exportProfile()">Export JSON</button>
+          <label class="import-btn">
+            Import JSON
+            <input type="file" id="import-file" accept=".json" onchange="importProfile(event)" style="display:none" />
+          </label>
+        </div>
+        <div class="add-fact-form">
+          <select id="new-fact-category">
+            <option value="preferences">Preferences</option>
+            <option value="projects">Projects</option>
+            <option value="skills">Skills</option>
+            <option value="history">History</option>
+          </select>
+          <textarea id="new-fact-content" placeholder="Add a fact AllyAI should remember..."></textarea>
+          <button class="add-fact-btn" onclick="addFact()">Add Memory</button>
+        </div>
+        <div id="editor-content">
+          <p class="profile-empty">Loading profile...</p>
+        </div>
+      </section>
+
+      <div class="sidebar-footer">
+        <div class="status-dot" id="status-dot"></div>
+        <span class="status-text" id="status-text">ready</span>
+      </div>
+    </aside>
+
+    <main class="chat-area">
+      <header class="chat-header">
+        <div class="chat-title">
+          <strong>Chat with AllyAI</strong>
+          <span>RAG retrieval with ChromaDB and local memory</span>
+        </div>
+        <div class="chat-actions">
+          <div class="model-selector">
+            <select id="model-select" onchange="onModelChange()">
+              <option value="llama-3.3-70b">Loading models...</option>
+            </select>
+          </div>
+          <div class="session-info" id="session-info">new session</div>
+          <button class="clear-btn" onclick="clearConversation()">Clear</button>
+        </div>
+      </header>
+
+      <section class="messages" id="messages" aria-live="polite">
+        <div class="welcome" id="welcome">
+          <div class="welcome-title">Hello, I'm <em>AllyAI</em></div>
+          <div class="welcome-sub">
+            A polished AI companion with a private memory vault, semantic search, and RAG retrieval powered by your local backend.
+          </div>
+        </div>
+      </section>
+
+      <footer class="input-area">
+        <div class="input-wrapper">
+          <textarea id="message-input" placeholder="Ask AllyAI anything..." rows="1" oninput="autoResize(this)" onkeydown="handleKeydown(event)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+        <div class="input-hint">Press Enter to send. Shift + Enter adds a new line.</div>
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    let activeConversationId = null;
+    let messageCount = 0;
+    let isStreaming = false;
+    let currentModelKey = "llama-3.3-70b";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadModels();
+      await refreshProfile();
+      await refreshHistory();
+      document.getElementById("message-input").focus();
+    });
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value || "";
+      return div.innerHTML;
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
+      document.querySelectorAll(".sidebar-section").forEach(section => section.classList.add("hidden"));
+      document.querySelector(`.tab-btn[onclick="switchTab('${tab}')"]`).classList.add("active");
+      document.getElementById(`tab-${tab}`).classList.remove("hidden");
+      if (tab === "history") refreshHistory();
+      if (tab === "editor") loadEditor();
+    }
+
+    async function loadEditor() {
+      try {
+        const response = await fetch("/profile/full");
+        const data = await response.json();
+        renderEditor(data.profile);
+      } catch (err) {
+        console.error("Could not load profile for editing:", err);
+      }
+    }
+
+    function renderEditor(profile) {
+      const container = document.getElementById("editor-content");
+      const labels = {
+        preferences: "Preferences",
+        projects: "Projects",
+        skills: "Skills",
+        history: "History"
+      };
+      let html = "";
+
+      for (const [category, facts] of Object.entries(profile || {})) {
+        if (!facts || facts.length === 0) continue;
+        html += `<div class="editor-category-title">${labels[category] || category}</div>`;
+        facts.forEach(fact => {
+          html += `
+            <div class="editable-fact" id="fact-${fact.id}">
+              <div class="editable-fact-content">${escapeHtml(fact.content)}</div>
+              <button class="delete-fact-btn" onclick="deleteFact(${fact.id})" title="Delete fact">x</button>
+            </div>
+          `;
+        });
+      }
+
+      container.innerHTML = html || "<p class=\"profile-empty\">No facts yet.<br />Add one above or start chatting.</p>";
+    }
+
+    async function deleteFact(factId) {
+      try {
+        await fetch(`/profile/fact/${factId}`, { method: "DELETE" });
+        await loadEditor();
+        await refreshProfile();
+      } catch (err) {
+        console.error("Could not delete fact:", err);
+      }
+    }
+
+    async function addFact() {
+      const category = document.getElementById("new-fact-category").value;
+      const contentEl = document.getElementById("new-fact-content");
+      const content = contentEl.value.trim();
+      if (!content) return;
+
+      try {
+        await fetch("/profile/fact", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category, content })
+        });
+        contentEl.value = "";
+        await loadEditor();
+        await refreshProfile();
+      } catch (err) {
+        console.error("Could not add fact:", err);
+      }
+    }
+
+    async function loadModels() {
+      try {
+        const response = await fetch("/models");
+        const data = await response.json();
+        const select = document.getElementById("model-select");
+        select.innerHTML = "";
+
+        if (!data.models || data.models.length === 0) {
+          select.innerHTML = "<option value=\"llama-3.3-70b\">No configured models</option>";
+          return;
+        }
+
+        data.models.forEach(model => {
+          const option = document.createElement("option");
+          option.value = model.key;
+          option.textContent = model.name || model.key;
+          select.appendChild(option);
+        });
+
+        currentModelKey = select.value;
+      } catch (err) {
+        console.error("Could not load models:", err);
+      }
+    }
+
+    function onModelChange() {
+      const select = document.getElementById("model-select");
+      currentModelKey = select.value;
+      const notice = document.createElement("div");
+      notice.className = "model-switch-notice";
+      notice.textContent = `Switched to ${select.options[select.selectedIndex].textContent}. Memory stays the same.`;
+      document.getElementById("messages").appendChild(notice);
+      scrollToBottom();
+      setTimeout(() => notice.remove(), 3000);
+    }
+
+    async function sendMessage() {
+      if (isStreaming) return;
+      const input = document.getElementById("message-input");
+      const text = input.value.trim();
+      if (!text) return;
+
+      const welcome = document.getElementById("welcome");
+      if (welcome) welcome.remove();
+
+      appendMessage("user", text);
+      input.value = "";
+      autoResize(input);
+      messageCount += 1;
+      document.getElementById("session-info").textContent = `${messageCount} message${messageCount > 1 ? "s" : ""} this session`;
+      setStreaming(true);
+
+      const assistantEl = appendMessage("assistant", "");
+      const bubble = assistantEl.querySelector(".message-bubble");
+      const cursor = document.createElement("span");
+      cursor.className = "cursor";
+      bubble.appendChild(cursor);
+      let fullText = "";
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, model_key: currentModelKey })
+        });
+
+        if (!response.ok || !response.body) {
+          throw new Error("Chat request failed");
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          fullText += decoder.decode(value, { stream: true });
+          bubble.textContent = fullText;
+          bubble.appendChild(cursor);
+          scrollToBottom();
+        }
+
+        cursor.remove();
+        bubble.innerHTML = marked.parse(fullText);
+
+        setTimeout(async () => {
+          await refreshProfile();
+          await refreshHistory();
+        }, 1600);
+      } catch (err) {
+        cursor.remove();
+        bubble.textContent = "Something went wrong. Is the FastAPI backend running?";
+        console.error(err);
+      }
+
+      setStreaming(false);
+    }
+
+    async function loadConversation(conversationId) {
+      try {
+        const response = await fetch(`/conversations/${conversationId}`);
+        const data = await response.json();
+        const messagesEl = document.getElementById("messages");
+        messagesEl.innerHTML = "";
+        data.messages.forEach(msg => appendMessage(msg.role, msg.content));
+        activeConversationId = conversationId;
+        messageCount = data.messages.filter(m => m.role === "user").length;
+        document.getElementById("session-info").textContent = `${messageCount} message${messageCount > 1 ? "s" : ""} this session`;
+        document.querySelectorAll(".conversation-item").forEach(el => {
+          el.classList.toggle("active", parseInt(el.dataset.id, 10) === conversationId);
+        });
+        scrollToBottom();
+      } catch (err) {
+        console.error("Could not load conversation:", err);
+      }
+    }
+
+    async function deleteConversation(conversationId, event) {
+      event.stopPropagation();
+      try {
+        await fetch(`/conversations/${conversationId}`, { method: "DELETE" });
+        await refreshHistory();
+        if (activeConversationId === conversationId) startNewChat();
+      } catch (err) {
+        console.error("Could not delete conversation:", err);
+      }
+    }
+
+    async function startNewChat() {
+      await fetch("/conversation", { method: "DELETE" });
+      document.getElementById("messages").innerHTML = `
+        <div class="welcome" id="welcome">
+          <div class="welcome-title">Hello, I'm <em>AllyAI</em></div>
+          <div class="welcome-sub">
+            A polished AI companion with a private memory vault, semantic search, and RAG retrieval powered by your local backend.
+          </div>
+        </div>
+      `;
+      activeConversationId = null;
+      messageCount = 0;
+      document.getElementById("session-info").textContent = "new session";
+      document.querySelectorAll(".conversation-item").forEach(el => el.classList.remove("active"));
+    }
+
+    async function refreshHistory() {
+      try {
+        const response = await fetch("/conversations");
+        const data = await response.json();
+        renderHistory(data.conversations);
+      } catch (err) {
+        console.error("Could not load history:", err);
+      }
+    }
+
+    function renderHistory(conversations) {
+      const container = document.getElementById("history-content");
+      let html = `<button class="new-chat-btn" onclick="startNewChat()">New conversation</button>
+        <div class="import-url-section">
+          <div class="section-label">Import conversation</div>
+          <div class="import-url-form">
+            <input type="text" id="import-url-input" placeholder="Paste ChatGPT share link..." class="import-url-input" />
+            <button class="import-url-btn" onclick="importFromUrl()">Import</button>
+          </div>
+          <div class="import-url-hint">Paste a chatgpt.com/share/... link to continue the conversation in AllyAI.</div>
+        </div>`;
+
+      if (!conversations || conversations.length === 0) {
+        container.innerHTML = html + "<p class=\"profile-empty\">No conversations yet.</p>";
+        return;
+      }
+
+      conversations.forEach(conv => {
+        const date = new Date(conv.updated_at);
+        const dateStr = date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+        const isActive = conv.id === activeConversationId;
+        html += `
+          <div class="conversation-item ${isActive ? "active" : ""}" data-id="${conv.id}" onclick="loadConversation(${conv.id})">
+            <div class="conversation-title">${escapeHtml(conv.title)}</div>
+            <div class="conversation-meta">
+              <span>${dateStr}</span>
+              <button class="conversation-delete" onclick="deleteConversation(${conv.id}, event)" title="Delete">x</button>
+            </div>
+          </div>
+        `;
+      });
+
+      container.innerHTML = html;
+    }
+
+    async function refreshProfile() {
+      try {
+        const response = await fetch("/profile");
+        const data = await response.json();
+        renderProfile(data.profile);
+      } catch (err) {
+        console.error("Could not load profile:", err);
+      }
+    }
+
+    function renderProfile(profileText) {
+      const container = document.getElementById("profile-content");
+      if (!profileText || profileText.includes("No profile data yet")) {
+        container.innerHTML = "<p class=\"profile-empty\">Your profile is empty.<br />Start chatting and AllyAI will learn as you talk.</p>";
+        return;
+      }
+
+      const lines = profileText.split("\n");
+      let html = "";
+      let currentCategory = null;
+      let facts = [];
+
+      const flushCategory = () => {
+        if (currentCategory && facts.length > 0) {
+          html += `<div class="profile-category"><div class="category-title">${escapeHtml(currentCategory)}</div><div class="category-facts">`;
+          facts.forEach(fact => {
+            html += `<div class="fact-item">${escapeHtml(fact)}</div>`;
+          });
+          html += "</div></div>";
+        }
+      };
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if (!trimmed) return;
+        if (trimmed.endsWith(":") && !trimmed.startsWith("-")) {
+          flushCategory();
+          currentCategory = trimmed.replace(":", "");
+          facts = [];
+        } else if (trimmed.startsWith("-")) {
+          facts.push(trimmed.replace(/^-\s*/, ""));
+        }
+      });
+
+      flushCategory();
+      container.innerHTML = html || "<p class=\"profile-empty\">Your profile is empty.<br />Start chatting and AllyAI will learn as you talk.</p>";
+    }
+
+    function appendMessage(role, content) {
+      const messagesEl = document.getElementById("messages");
+      const messageEl = document.createElement("div");
+      messageEl.className = `message ${role}`;
+      const renderedContent = role === "assistant" && content ? marked.parse(content) : escapeHtml(content);
+      messageEl.innerHTML = `
+        <div class="message-role">${role === "user" ? "you" : "AllyAI"}</div>
+        <div class="message-bubble">${renderedContent}</div>
+      `;
+      messagesEl.appendChild(messageEl);
+      scrollToBottom();
+      return messageEl;
+    }
+
+    async function clearConversation() {
+      await startNewChat();
+    }
+
+    function setStreaming(state) {
+      isStreaming = state;
+      document.getElementById("send-btn").disabled = state;
+      document.getElementById("message-input").disabled = state;
+      document.getElementById("model-select").disabled = state;
+      document.getElementById("status-dot").classList.toggle("active", state);
+      document.getElementById("status-text").textContent = state ? "thinking..." : "ready";
+    }
+
+    function handleKeydown(e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    }
+
+    function autoResize(textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = Math.min(textarea.scrollHeight, 140) + "px";
+    }
+
+    function scrollToBottom() {
+      const messages = document.getElementById("messages");
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    async function importFromUrl() {
+      const input = document.getElementById("import-url-input");
+      const btn = document.querySelector(".import-url-btn");
+      const url = input.value.trim();
+      if (!url) return;
+
+      btn.disabled = true;
+      btn.textContent = "Importing...";
+      const existingStatus = document.querySelector(".import-status");
+      if (existingStatus) existingStatus.remove();
+
+      try {
+        const response = await fetch("/import/url", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+          showImportStatus(data.detail || "Import failed", "error");
+          return;
+        }
+
+        showImportStatus(`Imported ${data.message_count} messages from ${data.title}`, "success");
+        document.getElementById("messages").innerHTML = "";
+
+        const convResponse = await fetch(`/conversations/${data.conversation_id}`);
+        const convData = await convResponse.json();
+        convData.messages.forEach(msg => appendMessage(msg.role, msg.content));
+
+        activeConversationId = data.conversation_id;
+        messageCount = convData.messages.filter(m => m.role === "user").length;
+        document.getElementById("session-info").textContent = `${messageCount} messages imported`;
+        input.value = "";
+        await refreshHistory();
+        setTimeout(refreshProfile, 3000);
+        scrollToBottom();
+      } catch (err) {
+        showImportStatus("Network error. Is the backend running?", "error");
+        console.error(err);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Import";
+      }
+    }
+
+    function showImportStatus(message, type) {
+      const form = document.querySelector(".import-url-form");
+      const existing = document.querySelector(".import-status");
+      if (existing) existing.remove();
+      const status = document.createElement("div");
+      status.className = `import-status ${type}`;
+      status.textContent = message;
+      form.after(status);
+    }
+
+    async function exportProfile() {
+      try {
+        const response = await fetch("/profile/export");
+        const data = await response.json();
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "allyai-profile.json";
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        console.error("Export failed:", err);
+      }
+    }
+
+    async function importProfile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const response = await fetch("/profile/import", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        await refreshProfile();
+        await loadEditor();
+        alert(result.message);
+      } catch (err) {
+        console.error("Import failed:", err);
+        alert("Import failed. Make sure this is a valid AllyAI export file.");
+      }
+
+      event.target.value = "";
+    }
+    window.addEventListener("resize", () => {
+  const messages = document.getElementById("messages");
+  if (messages) {
+    messages.scrollTop = messages.scrollHeight;
+  }
+});
+  </script>
+</body>
+</html>

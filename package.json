@@ -1,0 +1,8 @@
+{
+  "name": "allyai-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "poetry run uvicorn backend.main:app --reload"
+  }
+}
