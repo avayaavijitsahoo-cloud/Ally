@@ -7,7 +7,8 @@ AllyAI remembers important facts across conversations using local storage and ve
 ---
 
 ## Features
-
+## How it works??
+https://drive.google.com/file/d/1I4lctyTLFNtEYnhlemxE1EAN6h3VdoyQ/view?usp=sharing
 ### Persistent Memory
 
 * Stores important user facts locally
